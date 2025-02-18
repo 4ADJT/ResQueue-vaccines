@@ -3,11 +3,11 @@ networks:
     driver: bridge
 
 volumes:
-  resqueue_vaccine_db_data:
+  resqueue_vaccine_network_db_data:
 
 services:
   postgresdb:
-    image: postgres:latest
+    image: postgres:16-bullseye
     container_name: resqueue_vaccine_postgres
     restart: on-failure
     environment:
@@ -17,7 +17,10 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h localhost -U ${DATASOURCE_USERNAME} -d ${DATASOURCE_DATABASE}"]
+      test: [
+        "CMD-SHELL",
+        "pg_isready -h localhost -U ${DATASOURCE_USERNAME} -d ${DATASOURCE_DATABASE}",
+      ]
       interval: 10s
       retries: 5
       start_period: 30s
@@ -25,7 +28,7 @@ services:
     networks:
       - resqueue_vaccine_network
     volumes:
-      - resqueue_vaccine_db_data:/var/lib/postgresql/data
+      - resqueue_vaccine_network_db_data:/var/lib/postgresql/data
 
   app:
     container_name: resqueue_vaccine_app
