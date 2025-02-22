@@ -54,4 +54,14 @@ public class BatchService {
     Batch batch = findById(id);
     batchRepository.delete(batch);
   }
+
+  public String useBatch(UUID id, int quantity) {
+    Batch batch = findById(id);
+    if (batch.getAvailableQuantity() < quantity) {
+      return "Not enough vaccines in batch";
+    }
+    batch.setAvailableQuantity(batch.getAvailableQuantity() - quantity);
+    batchRepository.save(batch);
+    return "Vaccines used";
+  }
 }

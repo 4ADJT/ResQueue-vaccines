@@ -1,0 +1,49 @@
+server:
+  port: 0
+  forward-headers-strategy: framework
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/resqueue_vaccine
+    username: postgres
+    password: postgres
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 30000
+      connection-timeout: 20000
+      max-lifetime: 1800000
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:9000/realms/resqueue
+  jpa:
+    database: postgresql
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+springdoc:
+  api-docs:
+    enabled: true
+    path: /vaccine/v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /docs
+    config-url: /vaccine/v3/api-docs/swagger-config
+    urls:
+      - name: vaccine-service
+        url: /vaccine/v3/api-docs
+    

@@ -60,4 +60,10 @@ public class BatchController {
   public void delete(@PathVariable UUID id) {
     batchService.delete(id);
   }
+
+  @Operation(summary = "Use batch")
+  @PostMapping("/{id}/use")
+  public String useBatch(@PathVariable UUID id, @RequestBody int quantity) {
+      return batchService.useBatch(id, quantity);
+  }
 }
