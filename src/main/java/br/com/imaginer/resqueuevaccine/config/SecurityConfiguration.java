@@ -32,9 +32,11 @@ public class SecurityConfiguration {
             .requestMatchers("/actuator/**").permitAll()
             .requestMatchers("/users/create").permitAll()
             .requestMatchers("/auth/login/").permitAll()
-            .requestMatchers("/users/v3/").permitAll()
-            .requestMatchers("/swagger-ui/").permitAll()
-            .requestMatchers("/webjars/").permitAll()
+            .requestMatchers("/vaccine/v3/**").permitAll()
+            .requestMatchers("/swagger-ui/**").permitAll()
+            .requestMatchers("/webjars/**").permitAll()
+            .requestMatchers("/clinic/api").permitAll()
+            .requestMatchers("/vaccine/api").permitAll()
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(oauth2 ->
@@ -46,6 +48,6 @@ public class SecurityConfiguration {
 
   @Bean
   public JwtDecoder jwtDecoder() {
-    return JwtDecoders.fromIssuerLocation("");
+    return JwtDecoders.fromIssuerLocation(jwtProperties.getIssuerUri());
   }
 }
