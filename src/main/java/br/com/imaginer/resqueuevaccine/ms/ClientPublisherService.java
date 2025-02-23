@@ -16,9 +16,9 @@ public class ClientPublisherService {
 
     boolean sent = streamBridge.send("notifications", message);
     if (sent) {
-      log.info("Message sent to 'notification-exchange' with routing key: notification");
+      log.info("Message sent to 'notifications-exchange' with routing key: notifications");
     } else {
-      log.error("Failed to send message to 'notification-exchange'");
+      log.error("Failed to send message to 'notifications-exchange'");
     }
   }
 
