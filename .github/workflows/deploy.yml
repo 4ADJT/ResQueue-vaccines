@@ -29,7 +29,7 @@ jobs:
             docker rmi ${{ secrets.DOCKERHUB_REPOSITORY }}:latest || true
             docker pull ${{ secrets.DOCKERHUB_REPOSITORY }}:latest
             docker run -d --network host --name vaccine \
-              --restart=on-failure \
+              --restart=unless-stopped \
               -e SPRING_PROFILES_ACTIVE=prod \
               -e eureka.environment=prod \
               -e AUTH_BASE_URL=${{ secrets.AUTH_BASE_URL }} \
