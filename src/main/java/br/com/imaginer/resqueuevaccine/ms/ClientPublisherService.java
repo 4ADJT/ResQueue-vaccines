@@ -14,7 +14,7 @@ public class ClientPublisherService {
 
   public void publishNewClientEvent(Object message) {
 
-    boolean sent = streamBridge.send("notification", message);
+    boolean sent = streamBridge.send("notifications", message);
     if (sent) {
       log.info("Message sent to 'notification-exchange' with routing key: notification");
     } else {
