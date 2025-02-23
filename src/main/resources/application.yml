@@ -6,6 +6,27 @@ spring:
   application:
     name: resqueue-vaccine
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST:jackal.rmq.cloudamqp.com}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:qfbirurm}
+    password: ${RABBITMQ_PASSWORD:I8GlIzgSlp05u4YUuhcF3hU26URfTQxq}
+    virtual-host: ${RABBITMQ_VIRTUAL_HOST:qfbirurm}
+
+  cloud:
+    stream:
+      bindings:
+        notifications:
+          destination: vaccine-exchange
+
+      rabbit:
+        bindings:
+          notifications:
+            producer:
+              exchange-type: topic
+              routing-key: notifications
+              delivery-mode: PERSISTENT
+
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5434/resqueue_vaccine

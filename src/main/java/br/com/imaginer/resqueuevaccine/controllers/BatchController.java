@@ -3,6 +3,7 @@ package br.com.imaginer.resqueuevaccine.controllers;
 import java.util.List;
 import java.util.UUID;
 
+import br.com.imaginer.resqueuevaccine.ms.ClientPublisherService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,14 +26,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Slf4j
 @RestController
-@RequestMapping(path = "/batches")
+@RequestMapping(path = "/vaccine")
 @Tag(name = "Batch", description = "Batch REST operations")
 public class BatchController {
 
+  private final ClientPublisherService message;
   private final BatchService batchService;
 
-  public BatchController(BatchService batchService) {
+  public BatchController(BatchService batchService, ClientPublisherService message) {
     this.batchService = batchService;
+    this.message = message;
   }
 
   @Operation(summary = "Get all batches", security = { @SecurityRequirement(name = "bearer-key") })
@@ -76,5 +79,14 @@ public class BatchController {
   @PostMapping("/{id}/use")
   public ResponseEntity<String> useBatch(@PathVariable UUID id, @RequestBody int quantity) {
       return ResponseEntity.status(HttpStatus.CREATED).body(batchService.useBatch(id, quantity));
+  }
+
+  @Operation(summary = "Use message service")
+  @GetMapping("/message")
+  public ResponseEntity<?> sendMessage() {
+
+    message.publishNewClientEvent("test");
+
+    return ResponseEntity.ok().build();
   }
 }
