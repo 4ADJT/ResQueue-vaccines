@@ -1,0 +1,45 @@
+name: Deploy to VPS
+
+on:
+  workflow_run:
+    workflows: ["Docker Image CI"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_IP_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+            docker stop vaccine || true
+            docker rm vaccine || true
+            docker rmi ${{ secrets.DOCKERHUB_REPOSITORY }}:latest || true
+            docker pull ${{ secrets.DOCKERHUB_REPOSITORY }}:latest
+            docker run -d --network host --name vaccine \
+              -e SPRING_PROFILES_ACTIVE=prod \
+              -e eureka.environment=prod \
+              -e AUTH_BASE_URL=${{ secrets.AUTH_BASE_URL }} \
+              -e KC_BASE_ISSUER_URL=${{ secrets.KC_BASE_ISSUER_URL }} \
+              -e EUREKA_URL=${{ secrets.EUREKA_URL }} \
+              -e DATASOURCE_URL=${{ secrets.DATASOURCE_URL }} \
+              -e DATASOURCE_USERNAME=${{ secrets.DATASOURCE_USERNAME }} \
+              -e DATASOURCE_PASSWORD=${{ secrets.DATASOURCE_PASSWORD }} \
+              -e RABBITMQ_HOST=${{ secrets.RABBITMQ_HOST }} \
+              -e RABBITMQ_PORT=${{ secrets.RABBITMQ_PORT }} \
+              -e RABBITMQ_USERNAME=${{ secrets.RABBITMQ_USERNAME }} \
+              -e RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }} \
+              -e RABBITMQ_VIRTUAL_HOST=${{ secrets.RABBITMQ_VIRTUAL_HOST }} \
+              ${{ secrets.DOCKERHUB_REPOSITORY }}:latest
