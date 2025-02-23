@@ -15,9 +15,12 @@ spring:
 
   cloud:
     stream:
+      defaultBinder: rabbit
       bindings:
         notifications:
-          destination: vaccine-exchange
+          destination: notifications-exchange
+          # contentType: application/json
+          binder: rabbit
       rabbit:
         bindings:
           notifications:
@@ -28,9 +31,9 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/resqueue_vaccine}
-    username: ${DATABASE_USERNAME:postgres}
-    password: ${DATABASE_PASSWORD:postgres}
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/resqueue_vaccine}
+    username: ${DATASOURCE_USERNAME:postgres}
+    password: ${DATASOURCE_PASSWORD:postgres}
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2
