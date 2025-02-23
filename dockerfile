@@ -1,22 +1,21 @@
-FROM maven:3.9.4-eclipse-temurin-21 AS builder
+FROM maven:3-amazoncorretto-21 AS build
 
 WORKDIR /app
 
-COPY pom.xml /app/
-COPY src /app/src
+COPY pom.xml .
 
-RUN mvn -B package -DskipTests || true
+RUN mvn dependency:resolve
 
-RUN mvn -B package -DskipTests
+COPY src ./src
+
+RUN mvn clean package -DskipTests
 
 FROM amazoncorretto:21 AS runner
 
-ENV SPRING_PROFILES_ACTIVE=prod
-
 WORKDIR /app
 
-COPY --from=builder /app/target/*.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+CMD ["java", "-jar", "app.jar"]

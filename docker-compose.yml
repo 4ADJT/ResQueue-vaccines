@@ -1,21 +1,13 @@
-networks:
-  resqueue_vaccine_network:
-    driver: bridge
-
-volumes:
-  resqueue_vaccine_network_db_data:
-
 services:
   postgresdb:
-    image: postgres:16-bullseye
+    image: postgres:latest
     container_name: resqueue_vaccine_postgres
     restart: on-failure
     environment:
       POSTGRES_USER: ${DATASOURCE_USERNAME}
       POSTGRES_PASSWORD: ${DATASOURCE_PASSWORD}
       POSTGRES_DB: ${DATASOURCE_DATABASE}
-    ports:
-      - "5432:5432"
+    network_mode: host
     healthcheck:
       test: [
         "CMD-SHELL",
@@ -25,26 +17,23 @@ services:
       retries: 5
       start_period: 30s
       timeout: 10s
-    networks:
-      - resqueue_vaccine_network
     volumes:
-      - resqueue_vaccine_network_db_data:/var/lib/postgresql/data
+      - pg_data:/var/lib/postgresql/data
 
   app:
     container_name: resqueue_vaccine_app
+    network_mode: host
     build:
       context: .
       dockerfile: Dockerfile
     restart: on-failure
-    ports:
-      - "${SERVER_PORT}:${SERVER_PORT}"
     environment:
       DATASOURCE_URL: ${DATASOURCE_URL}
       DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
       DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
-      SERVER_PORT: ${SERVER_PORT}
     depends_on:
       postgresdb:
         condition: service_healthy
-    networks:
-      - resqueue_vaccine_network
+
+volumes:
+  pg_data:
