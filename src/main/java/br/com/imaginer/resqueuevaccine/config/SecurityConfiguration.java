@@ -37,7 +37,7 @@ public class SecurityConfiguration {
             .requestMatchers("/webjars/**").permitAll()
             .requestMatchers("/clinic/api/**").permitAll()
             .requestMatchers("/vaccine/api/**").permitAll()
-            .requestMatchers("/vaccine/message").permitAll()
+            .requestMatchers("/vaccine/message/**").permitAll()
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(oauth2 ->

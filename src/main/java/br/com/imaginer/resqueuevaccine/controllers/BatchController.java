@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import br.com.imaginer.resqueuevaccine.ms.ClientPublisherService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.constraints.Null;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -82,10 +83,14 @@ public class BatchController {
   }
 
   @Operation(summary = "Use message service")
-  @GetMapping("/message")
-  public ResponseEntity<?> sendMessage() {
+  @GetMapping("/message/{messageText}")
+  public ResponseEntity<?> sendMessage(@PathVariable String messageText) {
 
-    message.publishNewClientEvent("test");
+    if (messageText.isEmpty()) {
+      messageText = "test";
+    }
+
+    message.publishNewClientEvent(messageText);
 
     return ResponseEntity.ok().build();
   }

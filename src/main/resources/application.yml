@@ -19,7 +19,7 @@ spring:
       bindings:
         notifications:
           destination: notifications-exchange
-          # contentType: application/json
+          contentType: application/json
           binder: rabbit
       rabbit:
         bindings:
