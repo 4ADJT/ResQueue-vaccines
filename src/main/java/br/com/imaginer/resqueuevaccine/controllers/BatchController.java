@@ -82,7 +82,7 @@ public class BatchController {
       return ResponseEntity.status(HttpStatus.CREATED).body(batchService.useBatch(id, quantity));
   }
 
-  @Operation(summary = "Use message service")
+  @Operation(summary = "Use message service", security = { @SecurityRequirement(name = "bearer-key") })
   @GetMapping("/message/{messageText}")
   public ResponseEntity<?> sendMessage(
       @PathVariable String messageText,

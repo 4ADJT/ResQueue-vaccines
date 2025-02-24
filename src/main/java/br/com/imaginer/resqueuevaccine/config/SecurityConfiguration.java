@@ -35,9 +35,9 @@ public class SecurityConfiguration {
             .requestMatchers("/vaccine/v3/**").permitAll()
             .requestMatchers("/swagger-ui/**").permitAll()
             .requestMatchers("/webjars/**").permitAll()
-            .requestMatchers("/clinic/api/**").permitAll()
-            .requestMatchers("/vaccine/api/**").permitAll()
-            .requestMatchers("/vaccine/message/**").permitAll()
+//            .requestMatchers("/clinic/api/**").permitAll()
+//            .requestMatchers("/vaccine/api/**").permitAll()
+//            .requestMatchers("/vaccine/message/**").permitAll()
             .anyRequest().authenticated()
         )
         .oauth2ResourceServer(oauth2 ->
