@@ -18,8 +18,8 @@ public class OpenAPIConfig {
   @Bean
   public OpenAPI customOpenAPI() {
     return new OpenAPI().info(new Info()
-        .title("User API Service")
-        .description("User API Service")
+        .title("Vaccine API Service")
+        .description("Vaccine API Service")
         .version("1.0.0"))
         .components(
             new Components()
