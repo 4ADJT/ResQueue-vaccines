@@ -84,7 +84,15 @@ public class BatchController {
 
   @Operation(summary = "Use message service")
   @GetMapping("/message/{messageText}")
-  public ResponseEntity<?> sendMessage(@PathVariable String messageText) {
+  public ResponseEntity<?> sendMessage(
+      @PathVariable String messageText,
+      @AuthenticationPrincipal Jwt jwt
+  ) {
+
+    UUID userId = UUID.fromString(jwt.getSubject());
+    String userEmailFromToken = jwt.getClaim("email");
+
+    log.info("Usuário autenticado: " + userId + " - " + userEmailFromToken);
 
     if (messageText.isEmpty()) {
       messageText = "test";

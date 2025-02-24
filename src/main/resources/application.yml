@@ -4,7 +4,7 @@ server:
 
 spring:
   application:
-    name: resqueue-vaccine
+    name: RESQUEUE-VACCINE
 
   rabbitmq:
     host: ${RABBITMQ_HOST:jackal.rmq.cloudamqp.com}
