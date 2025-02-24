@@ -31,7 +31,7 @@ spring:
 
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5432/resqueue_vaccine}
+    url: ${DATASOURCE_URL:jdbc:postgresql://localhost:5433/resqueue_vaccine}
     username: ${DATASOURCE_USERNAME:admin}
     password: ${DATASOURCE_PASSWORD:admin}
     hikari:
