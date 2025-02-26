@@ -1,5 +1,6 @@
 package br.com.imaginer.resqueuevaccine.models;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -22,12 +23,13 @@ public class Batch {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
   private UUID id;
-
+  private UUID clinicId;
   private String batchNumber;
   private String vaccineType;
   private Date manufactureDate;
   private Date expiryDate;
   private int quantity;
   private int availableQuantity;
+  private LocalDateTime eliminated;
 
 }
