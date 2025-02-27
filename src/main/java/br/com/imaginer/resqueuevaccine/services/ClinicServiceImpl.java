@@ -74,4 +74,15 @@ public class ClinicServiceImpl implements ClinicService {
     return clinicRepository.findByUserId(userId);
   }
 
+  @Override
+  public Clinic getActiveClinicByUser(UUID userId) {
+    Optional<List<Clinic>> clinics = this.getClinicsByUser(userId);
+
+    return clinics.orElseThrow(ClinicNotFoundException::new)
+        .stream()
+        .filter(Clinic::isActive)
+        .findFirst()
+        .orElseThrow(ClinicNotFoundException::new);
+  }
+
 }

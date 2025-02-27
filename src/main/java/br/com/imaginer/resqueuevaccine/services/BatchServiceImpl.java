@@ -1,10 +1,11 @@
 package br.com.imaginer.resqueuevaccine.services;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
+import br.com.imaginer.resqueuevaccine.dto.BatchRequest;
+import br.com.imaginer.resqueuevaccine.models.Clinic;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,8 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class BatchServiceImpl implements BatchService {
 
   private final BatchRepository batchRepository;
-  public BatchServiceImpl(BatchRepository batchRepository) {
+  private final ClinicService clinicService;
+  public BatchServiceImpl(BatchRepository batchRepository,
+                          ClinicService clinicService) {
     this.batchRepository = batchRepository;
+    this.clinicService = clinicService;
   }
 
   @Override
@@ -34,8 +38,19 @@ public class BatchServiceImpl implements BatchService {
   }
 
   @Override
-  public Batch create(Batch batch) {
-    return batchRepository.save(batch);
+  public Batch create(UUID userId, BatchRequest batch) {
+    Clinic activeClinic = clinicService.getActiveClinicByUser(userId);
+
+    Batch newBatch = new Batch();
+    newBatch.setClinic(activeClinic);
+    newBatch.setBatchNumber(batch.batchNumber());
+    newBatch.setVaccineType(batch.vaccineType());
+    newBatch.setManufactureDate(batch.manufactureDate());
+    newBatch.setExpiryDate(batch.expiryDate());
+    newBatch.setQuantity(batch.quantity());
+    newBatch.setAvailableQuantity(batch.availableQuantity());
+
+    return batchRepository.save(newBatch);
   }
 
   @Override

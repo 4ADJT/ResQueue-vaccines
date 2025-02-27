@@ -17,4 +17,6 @@ public interface ClinicService {
 
   Optional<List<Clinic>> getClinicsByUser(UUID userId);
 
+  Clinic getActiveClinicByUser(UUID userId);
+
 }
