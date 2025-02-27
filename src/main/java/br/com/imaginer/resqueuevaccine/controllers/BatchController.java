@@ -1,29 +1,25 @@
 package br.com.imaginer.resqueuevaccine.controllers;
 
-import java.util.List;
-import java.util.UUID;
-
-import br.com.imaginer.resqueuevaccine.ms.ClientPublisherService;
+import br.com.imaginer.resqueuevaccine.dto.BatchRequest;
+import br.com.imaginer.resqueuevaccine.models.Batch;
+import br.com.imaginer.resqueuevaccine.services.BatchService;
+import br.com.imaginer.resqueuevaccine.services.BatchServiceImpl;
+import br.com.imaginer.resqueuevaccine.utils.GetTokenJWT;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import jakarta.validation.constraints.Null;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import br.com.imaginer.resqueuevaccine.models.Batch;
-import br.com.imaginer.resqueuevaccine.services.BatchService;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -31,75 +27,71 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Tag(name = "Batch", description = "Batch REST operations")
 public class BatchController {
 
-  private final ClientPublisherService message;
   private final BatchService batchService;
 
-  public BatchController(BatchService batchService, ClientPublisherService message) {
+  public BatchController(BatchServiceImpl batchService
+  ) {
     this.batchService = batchService;
-    this.message = message;
   }
 
-  @Operation(summary = "Get all batches", security = { @SecurityRequirement(name = "bearer-key") })
+  @Operation(summary = "Get all batches", security = {@SecurityRequirement(name = "bearer-key")})
   @GetMapping
-  public ResponseEntity<List<Batch>> getAll(
+  public ResponseEntity<Page<Batch>> getAll(
+      @PageableDefault(size = 10, sort = "expiryDate", direction = Sort.Direction.ASC) Pageable pageable,
       @AuthenticationPrincipal Jwt jwt
   ) {
-    UUID userId = UUID.fromString(jwt.getSubject());
-    String userEmailFromToken = jwt.getClaim("email");
+    UUID userId = GetTokenJWT.obtainUserId(jwt);
 
-    log.info("Usuário autenticado: " + userId + " - " + userEmailFromToken);
-
-    return ResponseEntity.ok(batchService.findAll());
+    return ResponseEntity.ok(batchService.findAllByClinicId(userId, pageable));
   }
 
-  @Operation(summary = "Get batch by ID", security = { @SecurityRequirement(name = "bearer-key") })
-  @GetMapping("/{id}")
-  public ResponseEntity<Batch> getById(@PathVariable UUID id) {
-    return ResponseEntity.ok(batchService.findById(id));
+  @Operation(summary = "Get batch by ID", security = {@SecurityRequirement(name = "bearer-key")})
+  @GetMapping("/{batchId}")
+  public ResponseEntity<Batch> getById(@PathVariable UUID batchId,
+                                       @AuthenticationPrincipal Jwt jwt
+  ) {
+    UUID userId = GetTokenJWT.obtainUserId(jwt);
+
+    return ResponseEntity.ok(batchService.findById(userId, batchId));
   }
 
-  @Operation(summary = "Create new batch", security = { @SecurityRequirement(name = "bearer-key") })
+  @Operation(summary = "Create new batch", security = {@SecurityRequirement(name = "bearer-key")})
   @PostMapping
-  public ResponseEntity<Batch> create(@RequestBody Batch batch) {
-    return ResponseEntity.ok(batchService.create(batch));
-  }
-
-  @Operation(summary = "Update existing batch", security = { @SecurityRequirement(name = "bearer-key") })
-  @PutMapping("/{id}")
-  public ResponseEntity<Batch> update(@PathVariable UUID id, @RequestBody Batch batchData) {
-    return ResponseEntity.ok(batchService.update(id, batchData));
-  }
-
-  @Operation(summary = "Delete batch by ID", security = { @SecurityRequirement(name = "bearer-key") })
-  @DeleteMapping("/{id}")
-  public void delete(@PathVariable UUID id) {
-    batchService.delete(id);
-  }
-
-  @Operation(summary = "Use batch", security = { @SecurityRequirement(name = "bearer-key") })
-  @PostMapping("/{id}/use")
-  public ResponseEntity<String> useBatch(@PathVariable UUID id, @RequestBody int quantity) {
-      return ResponseEntity.status(HttpStatus.CREATED).body(batchService.useBatch(id, quantity));
-  }
-
-  @Operation(summary = "Use message service", security = { @SecurityRequirement(name = "bearer-key") })
-  @GetMapping("/message/{messageText}")
-  public ResponseEntity<?> sendMessage(
-      @PathVariable String messageText,
-      @AuthenticationPrincipal Jwt jwt
+  public ResponseEntity<Batch> create(@RequestBody BatchRequest batch,
+                                      @AuthenticationPrincipal Jwt jwt
   ) {
-
-    UUID userId = UUID.fromString(jwt.getSubject());
-    String userEmailFromToken = jwt.getClaim("email");
-
-    log.info("Usuário autenticado: " + userId + " - " + userEmailFromToken);
-
-    if (messageText.isEmpty()) {
-      messageText = "test";
-    }
-
-    message.publishNewClientEvent(messageText);
-
-    return ResponseEntity.ok().build();
+    UUID userId = GetTokenJWT.obtainUserId(jwt);
+    return ResponseEntity.status(201)
+        .body(batchService.create(userId, batch));
   }
+
+  @Operation(summary = "Update existing batch", security = {@SecurityRequirement(name = "bearer-key")})
+  @PutMapping("/{id}")
+  public ResponseEntity<Batch> update(@PathVariable UUID id,
+                                      @RequestBody Batch batchData,
+                                      @AuthenticationPrincipal Jwt jwt
+  ) {
+    UUID userId = GetTokenJWT.obtainUserId(jwt);
+    return ResponseEntity.ok(batchService.update(userId, id, batchData));
+  }
+
+  @Operation(summary = "Delete batch by ID", security = {@SecurityRequirement(name = "bearer-key")})
+  @DeleteMapping("/{id}")
+  public void delete(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
+    UUID userId = GetTokenJWT.obtainUserId(jwt);
+
+    batchService.delete(userId, id);
+  }
+
+  @Operation(summary = "Use batch", security = {@SecurityRequirement(name = "bearer-key")})
+  @PostMapping("/{id}/use")
+  public ResponseEntity<String> useBatch(@PathVariable UUID id,
+                                         @RequestBody int quantity,
+                                         @AuthenticationPrincipal Jwt jwt
+  ) {
+    UUID userId = GetTokenJWT.obtainUserId(jwt);
+    return ResponseEntity.status(HttpStatus.CREATED).body(batchService.useBatch(userId, id, quantity));
+  }
+
+
 }

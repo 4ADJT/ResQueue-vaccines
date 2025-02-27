@@ -1,13 +1,11 @@
 package br.com.imaginer.resqueuevaccine.models;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,11 +21,17 @@ public class Batch {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private UUID id;
 
+  @ManyToOne
+  @JoinColumn(name = "clinic_id", referencedColumnName = "clinic_id", nullable = false)
+  @JsonBackReference
+  private Clinic clinic;
+
   private String batchNumber;
   private String vaccineType;
   private Date manufactureDate;
   private Date expiryDate;
   private int quantity;
   private int availableQuantity;
+  private LocalDateTime eliminated;
 
 }
