@@ -9,10 +9,10 @@ import java.util.UUID;
 
 public interface BatchService {
 
-  Page<Batch> findAllByClinicId(UUID clinicId, Pageable pageable);
+  Page<Batch> findAllByClinicId(UUID userId, Pageable pageable);
   Batch create(UUID userId, BatchRequest batch);
-  Batch update(UUID id, Batch batchData);
-  void delete(UUID id);
-  String useBatch(UUID id, int quantity);
-  Batch findById(UUID id);
+  Batch update(UUID userId, UUID id, Batch batchData);
+  void delete(UUID userId, UUID id);
+  String useBatch(UUID userId, UUID id, int quantity);
+  Batch findById(UUID userId, UUID id);
 }

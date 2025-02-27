@@ -1,12 +1,9 @@
 package br.com.imaginer.resqueuevaccine.controllers;
 
 import br.com.imaginer.resqueuevaccine.dto.BatchRequest;
-import br.com.imaginer.resqueuevaccine.exception.ClinicNotFoundException;
 import br.com.imaginer.resqueuevaccine.models.Batch;
-import br.com.imaginer.resqueuevaccine.models.Clinic;
 import br.com.imaginer.resqueuevaccine.services.BatchService;
 import br.com.imaginer.resqueuevaccine.services.BatchServiceImpl;
-import br.com.imaginer.resqueuevaccine.services.ClinicService;
 import br.com.imaginer.resqueuevaccine.utils.GetTokenJWT;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -45,12 +42,6 @@ public class BatchController {
   ) {
     UUID userId = GetTokenJWT.obtainUserId(jwt);
 
-//    Clinic clinicByUser = clinicService.findByUserId(userId);
-//
-//    if (clinicByUser == null) {
-//      throw new ClinicNotFoundException();
-//    }
-
     return ResponseEntity.ok(batchService.findAllByClinicId(userId, pageable));
   }
 
@@ -60,14 +51,8 @@ public class BatchController {
                                        @AuthenticationPrincipal Jwt jwt
   ) {
     UUID userId = GetTokenJWT.obtainUserId(jwt);
-//
-//    Clinic clinicByUser = clinicService.findByUserIdAndClinicId(userId);
-//
-//    if (clinicByUser == null) {
-//      throw new ClinicNotFoundException();
-//    }
 
-    return ResponseEntity.ok(batchService.findById(batchId));
+    return ResponseEntity.ok(batchService.findById(userId, batchId));
   }
 
   @Operation(summary = "Create new batch", security = {@SecurityRequirement(name = "bearer-key")})
@@ -83,16 +68,19 @@ public class BatchController {
   @Operation(summary = "Update existing batch", security = {@SecurityRequirement(name = "bearer-key")})
   @PutMapping("/{id}")
   public ResponseEntity<Batch> update(@PathVariable UUID id,
-                                      @RequestBody BatchRequest batchData,
+                                      @RequestBody Batch batchData,
                                       @AuthenticationPrincipal Jwt jwt
   ) {
-    return null; // ResponseEntity.ok(batchService.update(id, batchData));
+    UUID userId = GetTokenJWT.obtainUserId(jwt);
+    return ResponseEntity.ok(batchService.update(userId, id, batchData));
   }
 
   @Operation(summary = "Delete batch by ID", security = {@SecurityRequirement(name = "bearer-key")})
   @DeleteMapping("/{id}")
-  public void delete(@PathVariable UUID id) {
-    batchService.delete(id);
+  public void delete(@PathVariable UUID id, @AuthenticationPrincipal Jwt jwt) {
+    UUID userId = GetTokenJWT.obtainUserId(jwt);
+
+    batchService.delete(userId, id);
   }
 
   @Operation(summary = "Use batch", security = {@SecurityRequirement(name = "bearer-key")})
@@ -101,7 +89,8 @@ public class BatchController {
                                          @RequestBody int quantity,
                                          @AuthenticationPrincipal Jwt jwt
   ) {
-    return ResponseEntity.status(HttpStatus.CREATED).body(batchService.useBatch(id, quantity));
+    UUID userId = GetTokenJWT.obtainUserId(jwt);
+    return ResponseEntity.status(HttpStatus.CREATED).body(batchService.useBatch(userId, id, quantity));
   }
 
 

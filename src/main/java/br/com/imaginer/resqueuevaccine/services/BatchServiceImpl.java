@@ -27,14 +27,21 @@ public class BatchServiceImpl implements BatchService {
   }
 
   @Override
-  public Page<Batch> findAllByClinicId(UUID clinicId, Pageable pageable) {
-    return batchRepository.findAllByClinicId(clinicId, pageable);
+  public Page<Batch> findAllByClinicId(UUID userId, Pageable pageable) {
+    Clinic activeClinic = clinicService.getActiveClinicByUser(userId);
+
+    return batchRepository.findAllByClinicId(activeClinic.getId(),
+        pageable
+    );
   }
 
   @Override
-  public Batch findById(UUID id) {
-    return batchRepository.findById(id)
-      .orElseThrow(() -> new EntityNotFoundException("Batch not found"));
+  public Batch findById(UUID userId, UUID id) {
+    Clinic activeClinic = clinicService.getActiveClinicByUser(userId);
+    return batchRepository.findById(id).stream()
+        .filter(c -> c.getClinic().getId().equals(activeClinic.getId()))
+        .findFirst()
+        .orElseThrow(() -> new EntityNotFoundException("Batch not found"));
   }
 
   @Override
@@ -54,7 +61,7 @@ public class BatchServiceImpl implements BatchService {
   }
 
   @Override
-  public Batch update(UUID id, Batch batchData) {
+  public Batch update(UUID userId, UUID id, Batch batchData) {
     Optional<Batch> optional = batchRepository.findById(id);
     if (optional.isEmpty()) {
       return null;
@@ -71,8 +78,8 @@ public class BatchServiceImpl implements BatchService {
 
   @Override
   @Transactional
-  public void delete(UUID id) {
-    Batch batch = findById(id);
+  public void delete(UUID userId, UUID id) {
+    Batch batch = findById(userId, id);
 
     batch.setEliminated(LocalDateTime.now());
 
@@ -80,8 +87,8 @@ public class BatchServiceImpl implements BatchService {
   }
 
   @Override
-  public String useBatch(UUID id, int quantity) {
-    Batch batch = findById(id);
+  public String useBatch(UUID userId, UUID id, int quantity) {
+    Batch batch = findById(userId, id);
 
     if(batch.getEliminated() != null) {
       return "Batch eliminated at the moment.";

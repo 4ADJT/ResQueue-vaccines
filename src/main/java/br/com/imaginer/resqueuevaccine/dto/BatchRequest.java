@@ -3,7 +3,6 @@ package br.com.imaginer.resqueuevaccine.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Date;
-import java.util.UUID;
 
 public record BatchRequest(
     @JsonProperty("batch_number") String batchNumber,
