@@ -14,6 +14,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -42,43 +44,37 @@ public class ClinicController {
       throw new UnauthorizedUser();
     }
 
-    Clinic createClinic = Clinic.builder()
-        .clinicId(body.clinicId())
-        .userId(userId)
-        .active(body.active())
-        .build();
-
-    return ResponseEntity.status(201).body(clinicService.create(createClinic));
+    return ResponseEntity.status(201).body(clinicService.create(body));
   }
 
-  @Operation(description = "Atualizar o status da clínica.",
+  @Operation(description = "Desativar a clínica.",
       security = {@SecurityRequirement(name = "bearer-key")})
-  @PutMapping("/update/{clinicId}")
-  public ResponseEntity<Clinic> updateClinic(
+  @PutMapping("/deactivate/{clinicId}")
+  public ResponseEntity<Clinic> deactivateClinic(
       @AuthenticationPrincipal Jwt jwt,
-      @PathVariable UUID clinicId,
-      @RequestParam boolean status
+      @PathVariable UUID clinicId
   ) {
 
     UUID userId = GetTokenJWT.obtainUserId(jwt);
 
     return ResponseEntity.status(201).body(
-        clinicService.update(clinicId, userId, status)
+        clinicService.deactivate(clinicId, userId)
     );
   }
 
   @Operation(description = "Obter a clínica do usuário.",
       security = {@SecurityRequirement(name = "bearer-key")})
   @GetMapping()
-  public ResponseEntity<Clinic> getUserClinic(
+  public ResponseEntity<Optional<List<Clinic>>> getUserClinic(
       @AuthenticationPrincipal Jwt jwt
   ) {
 
     UUID userId = GetTokenJWT.obtainUserId(jwt);
 
     return ResponseEntity.status(200).body(
-        clinicService.findByUserId(userId)
+        clinicService.getClinicsByUser(userId)
     );
+
   }
 
 }

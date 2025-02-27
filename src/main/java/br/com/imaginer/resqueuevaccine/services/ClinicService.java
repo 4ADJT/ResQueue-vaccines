@@ -1,15 +1,20 @@
 package br.com.imaginer.resqueuevaccine.services;
 
+import br.com.imaginer.resqueuevaccine.dto.ClinicRequest;
 import br.com.imaginer.resqueuevaccine.models.Clinic;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface ClinicService {
 
-  Clinic create(Clinic clinic);
+  Clinic create(ClinicRequest clinic);
 
-  Clinic findByUserId(UUID userId);
+  Clinic findByUserIdAndClinicId(UUID clinicId, UUID userId);
 
-  Clinic update(UUID clinicId, UUID userId, boolean active);
+  Clinic deactivate(UUID clinicId, UUID userId);
+
+  Optional<List<Clinic>> getClinicsByUser(UUID userId);
 
 }

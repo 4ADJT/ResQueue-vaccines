@@ -1,5 +1,6 @@
 package br.com.imaginer.resqueuevaccine.services;
 
+import br.com.imaginer.resqueuevaccine.dto.ClinicRequest;
 import br.com.imaginer.resqueuevaccine.exception.ClinicAlreadyExistisException;
 import br.com.imaginer.resqueuevaccine.exception.ClinicNotFoundException;
 import br.com.imaginer.resqueuevaccine.exception.UnauthorizedUser;
@@ -9,7 +10,8 @@ import br.com.imaginer.resqueuevaccine.repositories.ClinicRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -22,26 +24,32 @@ public class ClinicServiceImpl implements ClinicService {
 
   @Override
   @Transactional
-  public Clinic create(Clinic clinic) {
+  public Clinic create(ClinicRequest clinic) {
 
-    Clinic clinicExists = this.findByUserId(clinic.getUserId());
+    Clinic clinicExists = this.findByUserIdAndClinicId(clinic.clinicId(), clinic.userId());
 
-    if(clinicExists != null) {
+    if(clinicExists != null && clinicExists.isActive()) {
       throw new ClinicAlreadyExistisException();
     }
 
-    return clinicRepository.save(clinic);
+    Clinic createClinic = Clinic.builder()
+        .clinicId(clinic.clinicId())
+        .userId(clinic.userId())
+        .active(true)
+        .build();
+
+    return clinicRepository.save(createClinic);
   }
 
   @Override
-  public Clinic findByUserId(UUID userId) {
-    return clinicRepository.findClinicByUserId(userId);
+  public Clinic findByUserIdAndClinicId(UUID clinicId, UUID userId) {
+    return clinicRepository.findActiveClinicByUserIdAndClinicId(clinicId, userId);
   }
 
   @Override
   @Transactional
-  public Clinic update(UUID clinicId, UUID userId, boolean active) {
-    Clinic clinic = clinicRepository.findByClinicId(clinicId);
+  public Clinic deactivate(UUID clinicId, UUID userId) {
+    Clinic clinic = clinicRepository.findActiveClinicByUserIdAndClinicId(clinicId, userId);
 
     if(clinic == null) {
       throw new ClinicNotFoundException();
@@ -51,13 +59,19 @@ public class ClinicServiceImpl implements ClinicService {
       throw new UnauthorizedUser();
     }
 
-    if(Objects.equals(clinic.isActive(), active)) {
+    if(!clinic.isActive()) {
       return clinic;
     }
 
-    clinic.setActive(active);
+    clinic.setActive(false);
 
     return clinicRepository.saveAndFlush(clinic);
+  }
+
+  @Override
+  public Optional<List<Clinic>> getClinicsByUser(UUID userId) {
+
+    return clinicRepository.findByUserId(userId);
   }
 
 }
