@@ -1,6 +1,7 @@
 package br.com.imaginer.resqueuevaccine.services;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,6 +25,10 @@ public class BatchServiceImpl implements BatchService {
                           ClinicService clinicService) {
     this.batchRepository = batchRepository;
     this.clinicService = clinicService;
+  }
+
+  public List<Batch> findAll() {
+    return batchRepository.findAll();
   }
 
   @Override
