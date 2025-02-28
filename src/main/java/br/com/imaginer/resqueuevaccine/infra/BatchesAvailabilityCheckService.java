@@ -27,7 +27,7 @@ public class BatchesAvailabilityCheckService {
 
   @Scheduled(fixedRate = 300000)
   public void checkBatchesAvailability() {
-    List<Batch> batches = batchService.findAll();
+    List<Batch> batches = batchService.findAllWithNullNotifyReason();
     
     for (Batch batch : batches) {
       if (isOutOfStock(batch)) {
@@ -47,6 +47,7 @@ public class BatchesAvailabilityCheckService {
   }
 
   private void notifyClient(Batch batch, String message) {
+    batch.setNotifyReason(message);
     clientPublisherService.publishNewClientEvent(new BatchNotification(batch, message));
   }
 }

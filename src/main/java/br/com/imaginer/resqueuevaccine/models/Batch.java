@@ -32,6 +32,7 @@ public class Batch {
   private Date expiryDate;
   private int quantity;
   private int availableQuantity;
+  private String notifyReason;
   private LocalDateTime eliminated;
 
 }

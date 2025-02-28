@@ -27,8 +27,8 @@ public class BatchServiceImpl implements BatchService {
     this.clinicService = clinicService;
   }
 
-  public List<Batch> findAll() {
-    return batchRepository.findAll();
+  public List<Batch> findAllWithNullNotifyReason() {
+    return batchRepository.findAllByNotifyReasonIsNull();
   }
 
   @Override
