@@ -15,4 +15,5 @@ public interface BatchService {
   void delete(UUID userId, UUID id);
   String useBatch(UUID userId, UUID id, int quantity);
   Batch findById(UUID userId, UUID id);
+  void updateBatchNotifyReason(Batch batch, String message);
 }

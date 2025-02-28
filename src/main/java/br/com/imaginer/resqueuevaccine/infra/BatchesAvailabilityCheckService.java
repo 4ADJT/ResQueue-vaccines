@@ -39,7 +39,7 @@ public class BatchesAvailabilityCheckService {
   }
 
   private boolean isOutOfStock(Batch batch) {
-    return batch.getQuantity() == 0;
+    return batch.getAvailableQuantity() == 0;
   }
 
   private boolean isAboutToExpire(Batch batch) {
@@ -47,7 +47,7 @@ public class BatchesAvailabilityCheckService {
   }
 
   private void notifyClient(Batch batch, String message) {
-    batch.setNotifyReason(message);
+    batchService.updateBatchNotifyReason(batch, message);
     clientPublisherService.publishNewClientEvent(new BatchNotification(batch, message));
   }
 }

@@ -28,7 +28,7 @@ public class BatchServiceImpl implements BatchService {
   }
 
   public List<Batch> findAllWithNullNotifyReason() {
-    return batchRepository.findAllByNotifyReasonIsNull();
+    return batchRepository.findAllByNotifyReasonIsNullAndEliminatedIsNull();
   }
 
   @Override
@@ -105,5 +105,10 @@ public class BatchServiceImpl implements BatchService {
     batch.setAvailableQuantity(batch.getAvailableQuantity() - quantity);
     batchRepository.save(batch);
     return "Vaccines used";
+  }
+
+  public void updateBatchNotifyReason(Batch batch, String message) {
+    batch.setNotifyReason(message);
+    batchRepository.save(batch);
   }
 }

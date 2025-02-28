@@ -11,5 +11,5 @@ import br.com.imaginer.resqueuevaccine.models.Batch;
 
 public interface BatchRepository extends JpaRepository<Batch, UUID> {
   Page<Batch> findAllByClinicId(UUID clinicId, Pageable pageable);
-  List<Batch> findAllByNotifyReasonIsNull();
+  List<Batch> findAllByNotifyReasonIsNullAndEliminatedIsNull();
 }
