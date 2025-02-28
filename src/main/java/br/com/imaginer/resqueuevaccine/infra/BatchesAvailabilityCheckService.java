@@ -43,7 +43,7 @@ public class BatchesAvailabilityCheckService {
   }
 
   private boolean isAboutToExpire(Batch batch) {
-    return batch.getExpiryDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(LocalDate.now().plusDays(5));
+    return batch.getExpiryDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(LocalDate.now().plusDays(6));
   }
 
   private void notifyClient(Batch batch, String message) {
