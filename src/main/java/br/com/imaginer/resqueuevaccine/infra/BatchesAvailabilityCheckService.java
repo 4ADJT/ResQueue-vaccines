@@ -4,7 +4,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -15,26 +16,37 @@ import br.com.imaginer.resqueuevaccine.services.BatchServiceImpl;
 
 @Service
 public class BatchesAvailabilityCheckService {
-
   private static final String OUT_OF_STOCK_MESSAGE = "Batch is out of stock.";
   private static final String ABOUT_TO_EXPIRE_MESSAGE = "Batch is about to expire.";
 
-  @Autowired
-  private ClientPublisherService clientPublisherService;
+  private final ClientPublisherService clientPublisherService;
+  private final BatchServiceImpl batchService;
 
-  @Autowired
-  private BatchServiceImpl batchService;
+  private final ApplicationContext applicationContext;
+
+  public BatchesAvailabilityCheckService(ClientPublisherService clientPublisherService,
+                                         BatchServiceImpl batchService,
+                                         ApplicationContext applicationContext) {
+    this.clientPublisherService = clientPublisherService;
+    this.batchService = batchService;
+    this.applicationContext = applicationContext;
+  }
 
   @Scheduled(fixedRate = 300000)
   public void checkBatchesAvailability() {
     List<Batch> batches = batchService.findAllWithNullNotifyReason();
-    
+
     for (Batch batch : batches) {
-      if (isOutOfStock(batch)) {
-        notifyClient(batch, OUT_OF_STOCK_MESSAGE);
-      } else if (isAboutToExpire(batch)) {
-        notifyClient(batch, ABOUT_TO_EXPIRE_MESSAGE);
-      }
+      getSelf().processBatch(batch);
+    }
+  }
+
+  @Async
+  public void processBatch(Batch batch) {
+    if (isOutOfStock(batch)) {
+      notifyClient(batch, OUT_OF_STOCK_MESSAGE);
+    } else if (isAboutToExpire(batch)) {
+      notifyClient(batch, ABOUT_TO_EXPIRE_MESSAGE);
     }
   }
 
@@ -43,11 +55,17 @@ public class BatchesAvailabilityCheckService {
   }
 
   private boolean isAboutToExpire(Batch batch) {
-    return batch.getExpiryDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate().isBefore(LocalDate.now().plusDays(6));
+    return batch.getExpiryDate().toInstant()
+        .atZone(ZoneId.systemDefault()).toLocalDate()
+        .isBefore(LocalDate.now().plusDays(6));
   }
 
   private void notifyClient(Batch batch, String message) {
     batchService.updateBatchNotifyReason(batch, message);
     clientPublisherService.publishNewClientEvent(new BatchNotification(batch, message));
+  }
+
+  private BatchesAvailabilityCheckService getSelf() {
+    return applicationContext.getBean(BatchesAvailabilityCheckService.class);
   }
 }
