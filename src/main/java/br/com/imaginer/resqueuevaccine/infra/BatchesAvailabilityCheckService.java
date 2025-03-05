@@ -7,14 +7,14 @@ import java.util.List;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import br.com.imaginer.resqueuevaccine.models.Batch;
 import br.com.imaginer.resqueuevaccine.models.BatchNotification;
 import br.com.imaginer.resqueuevaccine.ms.ClientPublisherService;
 import br.com.imaginer.resqueuevaccine.services.BatchServiceImpl;
 
-@Service
+@Component
 public class BatchesAvailabilityCheckService {
   private static final String OUT_OF_STOCK_MESSAGE = "Batch is out of stock.";
   private static final String ABOUT_TO_EXPIRE_MESSAGE = "Batch is about to expire.";
